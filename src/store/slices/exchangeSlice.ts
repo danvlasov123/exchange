@@ -15,7 +15,7 @@ const initialState: InitialState = {
   status: "init",
   data: {},
   values: {
-    from: "RUB",
+    from: "EUR",
     to: "USD",
     rate: 0,
   },
