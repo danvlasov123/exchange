@@ -20,7 +20,7 @@ type TypeSearchModal = {
 };
 
 const ModalChooseExchange: FC<TypeSearchModal> = ({ trigger, onSelect }) => {
-  const data = useAppSelector((state) => state.exchange.data);
+  const data = useAppSelector((state) => state.exchange.exchange_rates);
 
   const currency = Object.keys(data);
 

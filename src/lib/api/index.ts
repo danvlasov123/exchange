@@ -1,2 +1,2 @@
-export * from "./getСurrencies";
+export * from "./getExchangeRates";
 export * from "./getConverts";

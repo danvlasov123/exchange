@@ -1,4 +1,4 @@
-import { SyntheticEvent, FC, memo, useState } from "react";
+import { FC, memo } from "react";
 
 import { ArrowBottomIcon } from "src/components/icons";
 
@@ -9,15 +9,15 @@ import { numberValidate } from "src/lib/validates";
 import JSON_currency from "currency.json";
 
 export type ExchangeItemProps = {
-  currency: string;
+  name_rate: string;
   label?: string;
   value: string;
   onChange: (currency: string, value: string) => void;
 };
 
 const ExchangeItem: FC<ExchangeItemProps> = memo(
-  ({ currency, onChange, label = "Amount", value }) => {
-    const flag = JSON_currency.find((c) => c.code === currency);
+  ({ name_rate, onChange, label = "Amount", value }) => {
+    const flag = JSON_currency.find((c) => c.code === name_rate);
 
     return (
       <div>
@@ -32,8 +32,8 @@ const ExchangeItem: FC<ExchangeItemProps> = memo(
               onSelect={(name) => onChange(name, value)}
               trigger={
                 <button className="flex items-center gap-2">
-                  <p className="text-blue text-xl font-medium leading-[23.44px]">
-                    {currency}
+                  <p className="text-xl font-medium leading-[23.44px] text-blue">
+                    {name_rate}
                   </p>
                   <ArrowBottomIcon />
                 </button>
@@ -43,7 +43,7 @@ const ExchangeItem: FC<ExchangeItemProps> = memo(
           <div>
             <input
               value={numberValidate(value)}
-              onChange={(event) => onChange(currency, event.target.value)}
+              onChange={(event) => onChange(name_rate, event.target.value)}
               type="number"
               className="w-full rounded-[7px] bg-[#EFEFEF] px-3.5 py-[11px] text-right text-xl font-bold leading-[23.44px] text-[#3C3C3C] outline-none"
             />

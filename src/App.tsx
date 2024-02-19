@@ -5,7 +5,7 @@ import { Exchange } from "src/components/Exchange/Exchange";
 import { useAppSelector } from "./hooks/hooks";
 
 const App = () => {
-  const { values, status } = useAppSelector((state) => state.exchange);
+  const { rate, status } = useAppSelector((state) => state.exchange);
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-[#F6F6F6] px-4">
@@ -25,7 +25,7 @@ const App = () => {
               Indicative Exchange Rate
             </h3>
             <p className="mt-[13px] text-lg font-medium leading-[21.09px] text-black">
-              1 {values.from} = {values.rate} {values.to}
+              1 {rate.from_name} = {rate.amount} {rate.to_name}
             </p>
           </div>
         )}

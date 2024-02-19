@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getConverts, getСurrencies } from "src/lib/api";
+import { getConverts, getExchangeRates } from "src/lib/api";
 
 import { useAppSelector, useAppDispatch } from "src/hooks/hooks";
 
@@ -16,30 +16,33 @@ type Amount = {
 
 const Exchange = () => {
   const dispatch = useAppDispatch();
-  const { status, values } = useAppSelector((state) => state.exchange);
+  const { status, rate } = useAppSelector((state) => state.exchange);
 
-  const [amount, setAmount] = useState<Amount>({ from: "0", to: "0" });
+  const [inputAmounts, setInputAmounts] = useState<Amount>({
+    from: "0",
+    to: "0",
+  });
 
-  const updateCurrency = async (from: string, to: string) => {
+  const updateCurrency = async (from_name: string, to_name: string) => {
     try {
       dispatch(exchangeActions.setStatus("loading"));
 
-      const response = await getConverts({ from, to });
+      const response = await getConverts({ from: from_name, to: to_name });
 
       dispatch(exchangeActions.setStatus("success"));
 
       if (response?.status === 200) {
-        const rate = response.data.rates[to].rate ?? 0;
+        const new_amount = response.data.rates[to_name].rate ?? 0;
 
         dispatch(
-          exchangeActions.setValues({
-            to,
-            from,
-            rate: Number(rate),
+          exchangeActions.setRate({
+            to_name,
+            from_name,
+            amount: Number(new_amount),
           }),
         );
 
-        return Number(rate);
+        return Number(new_amount);
       }
       return 1;
     } catch (error) {
@@ -51,47 +54,47 @@ const Exchange = () => {
 
   const handleChange = {
     from: useCallback(
-      async (currency: string, value: string) => {
-        let to = Number(value) * values.rate;
+      async (new_name: string, quantity: string) => {
+        let updated_quantity_to = Number(quantity) * rate.amount;
 
-        if (currency !== values.from) {
-          const rate = await updateCurrency(currency, values.to);
+        if (new_name !== rate.from_name) {
+          const new_amount = await updateCurrency(new_name, rate.to_name);
 
-          to = Number(value) * rate;
+          updated_quantity_to = Number(quantity) * new_amount;
         }
 
-        setAmount({
-          from: value,
-          to: String(Number(to).toFixed(2)),
+        setInputAmounts({
+          from: quantity,
+          to: String(Number(updated_quantity_to).toFixed(2)),
         });
       },
-      [values],
+      [rate],
     ),
     to: useCallback(
-      async (currency: string, value: string) => {
-        let from = Number(value) / values.rate;
+      async (new_name: string, quantity: string) => {
+        let updated_quantity_from = Number(quantity) / rate.amount;
 
-        if (currency !== values.to) {
-          const rate = await updateCurrency(values.from, currency);
+        if (new_name !== rate.to_name) {
+          const new_amount = await updateCurrency(rate.from_name, new_name);
 
-          from = Number(value) / rate;
+          updated_quantity_from = Number(quantity) / new_amount;
         }
 
-        setAmount({
-          from: String(Number(from).toFixed(2)),
-          to: value,
+        setInputAmounts({
+          from: String(Number(updated_quantity_from).toFixed(2)),
+          to: quantity,
         });
       },
-      [values],
+      [rate],
     ),
     swap: async function () {
-      const updateValues = {
-        ...values,
-        from: values.to,
-        to: values.from,
+      const updatedRate = {
+        ...rate,
+        from_name: rate.to_name,
+        to_name: rate.from_name,
       };
-      await updateCurrency(updateValues.from, updateValues.to);
-      setAmount({ from: amount.to, to: amount.from });
+      await updateCurrency(updatedRate.from_name, updatedRate.to_name);
+      setInputAmounts({ from: inputAmounts.to, to: inputAmounts.from });
     },
   };
 
@@ -100,13 +103,13 @@ const Exchange = () => {
       try {
         dispatch(exchangeActions.setStatus("loading"));
 
-        const response = await getСurrencies();
+        const response = await getExchangeRates();
 
         if (response?.status === 200) {
-          dispatch(exchangeActions.setData(response.data.currencies));
+          dispatch(exchangeActions.setExchangeRates(response.data.currencies));
         }
 
-        await updateCurrency(values.from, values.to);
+        await updateCurrency(rate.from_name, rate.to_name);
       } catch (error) {
         console.error(error);
         dispatch(exchangeActions.setStatus("error"));
@@ -125,9 +128,9 @@ const Exchange = () => {
       <div>
         <ExchangeItem
           label="Amount"
-          currency={values.from}
+          name_rate={rate.from_name}
           onChange={handleChange.from}
-          value={amount.from}
+          value={inputAmounts.from}
         />
         <div className="flex items-center py-[15px]">
           <hr className="w-full text-[#E7E7EE]" />
@@ -142,9 +145,9 @@ const Exchange = () => {
         </div>
         <ExchangeItem
           label="Converted Amount"
-          value={amount.to}
-          currency={values.to}
+          name_rate={rate.to_name}
           onChange={handleChange.to}
+          value={inputAmounts.to}
         />
       </div>
     </div>

@@ -11,7 +11,7 @@ export type DataCurrencyList = {
 
 export type Currencies = Record<string, string>;
 
-export const getСurrencies = async () => {
+export const getExchangeRates = async () => {
   try {
     const response = await axios.get<DataCurrencyList>(url, {
       params: {
